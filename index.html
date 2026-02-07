@@ -1,0 +1,2616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Star Health Voice AI – Complete Scenario Blueprint</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            slate: { 850: '#151f32', 950: '#020617' },
+            brand: { 
+              blue: '#38bdf8', 
+              purple: '#a855f7', 
+              green: '#22c55e', 
+              orange: '#fb923c', 
+              red: '#ef4444',
+              pink: '#ec4899',
+              teal: '#14b8a6'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body { background-color: #0f172a; color: #f1f5f9; }
+    
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 8px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+    /* Animations */
+    .fade-in { animation: fadeIn 0.4s ease-out forwards; opacity: 0; transform: translateY(10px); }
+    @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+
+    .pulse-ring {
+      position: absolute;
+      border-radius: 50%;
+      animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.8); opacity: 0.8; }
+      100% { transform: scale(2); opacity: 0; }
+    }
+
+    .node-content { transition: all 0.3s ease; cursor: pointer; }
+    .node-content:hover { transform: translateX(8px); background: rgba(255,255,255,0.03); }
+    
+    .child-container {
+      margin-left: 1rem;
+      border-left: 1px solid #334155;
+      padding-left: 1rem;
+      display: none;
+      overflow: hidden;
+    }
+    .child-container.active { display: block; animation: slideDown 0.3s ease-out; }
+    @keyframes slideDown { from { opacity: 0; height: 0; } to { opacity: 1; height: auto; } }
+
+    .rotate-icon { transition: transform 0.3s ease; }
+    .rotate-icon.expanded { transform: rotate(90deg); }
+
+    /* Chat Bubbles */
+    .script-bubble {
+      padding: 14px 18px;
+      border-radius: 14px;
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      position: relative;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      animation: messageSlide 0.3s ease-out;
+    }
+    @keyframes messageSlide {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .bot-bubble {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border-left: 4px solid #38bdf8;
+      margin-right: 15%;
+      border-top-left-radius: 4px;
+    }
+    .user-bubble {
+      background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+      border-right: 4px solid #94a3b8;
+      margin-left: 15%;
+      text-align: right;
+      border-top-right-radius: 4px;
+    }
+    .sys-bubble {
+        background: #020617;
+        border: 1px solid #1e293b;
+        color: #94a3b8;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.8rem;
+        margin: 0 10%;
+    }
+    .agent-bubble {
+        background: linear-gradient(135deg, #7c3aed20 0%, #4c1d9520 100%);
+        border-left: 4px solid #a855f7;
+        margin-right: 10%;
+    }
+
+    .label-bot { color: #38bdf8; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; margin-bottom: 6px; display: block; letter-spacing: 0.05em; }
+    .label-user { color: #cbd5e1; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; margin-bottom: 6px; display: block; letter-spacing: 0.05em; }
+    .label-sys { color: #64748b; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; margin-bottom: 6px; display: block; letter-spacing: 0.05em; }
+    .label-agent { color: #a855f7; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; margin-bottom: 6px; display: block; letter-spacing: 0.05em; }
+
+    .glass-panel {
+      background: rgba(30, 41, 59, 0.4);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: all 0.3s;
+    }
+    .glass-panel:hover { border-color: rgba(255,255,255,0.1); transform: translateY(-2px); }
+
+    .scenario-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: all 0.2s;
+    }
+    .scenario-card:hover {
+      background: rgba(30, 41, 59, 0.6);
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+
+    .metric-card {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.4) 100%);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .tab-active {
+      border-bottom: 2px solid #38bdf8;
+      color: #38bdf8;
+    }
+    
+    .intent-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .progress-bar {
+      height: 4px;
+      background: #1e293b;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #38bdf8, #22c55e);
+      transition: width 0.5s ease;
+    }
+  </style>
+</head>
+
+<body class="antialiased h-screen overflow-hidden flex flex-col lg:flex-row">
+
+  <!-- LEFT: Navigation & Tree -->
+  <div class="w-full lg:w-4/12 flex flex-col border-r border-slate-800 bg-slate-900/30 h-full">
+    <header class="p-5 border-b border-slate-800 bg-slate-900/80 backdrop-blur z-10">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="relative">
+          <div class="p-2.5 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl shadow-lg shadow-blue-500/20">
+            <i class="fas fa-robot text-white text-xl"></i>
+          </div>
+          <div class="pulse-ring bg-blue-500/30 w-full h-full top-0 left-0"></div>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight text-white">Star Health Voice AI</h1>
+          <p class="text-xs text-slate-400 uppercase tracking-wider">Complete Scenario Matrix</p>
+        </div>
+      </div>
+      
+      <div class="flex gap-2 mt-3">
+        <button onclick="expandAll()" class="flex-1 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-medium transition-all border border-slate-700 hover:border-slate-600">
+          <i class="fas fa-expand-alt mr-1.5"></i>Expand
+        </button>
+        <button onclick="collapseAll()" class="flex-1 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-medium transition-all border border-slate-700 hover:border-slate-600">
+          <i class="fas fa-compress-alt mr-1.5"></i>Collapse
+        </button>
+        <button onclick="showMetrics()" class="px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 rounded-lg text-xs font-medium transition-all border border-blue-800/50">
+          <i class="fas fa-chart-line"></i>
+        </button>
+      </div>
+    </header>
+
+    <div class="p-3 bg-slate-900/50 border-b border-slate-800">
+      <div class="flex gap-2 text-xs">
+        <span class="px-2 py-1 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">Pre-Call</span>
+        <span class="px-2 py-1 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">Opening</span>
+        <span class="px-2 py-1 rounded bg-orange-500/10 text-orange-400 border border-orange-500/20">Objection</span>
+        <span class="px-2 py-1 rounded bg-green-500/10 text-green-400 border border-green-500/20">Success</span>
+      </div>
+    </div>
+
+    <div id="blueprint-tree" class="flex-1 overflow-y-auto p-4 space-y-2">
+      <!-- Tree nodes injected via JS -->
+    </div>
+    
+    <div class="p-4 border-t border-slate-800 bg-slate-900/50">
+      <div class="text-xs text-slate-500 text-center">
+        <i class="fas fa-shield-alt mr-1"></i>IRDAI Compliant • DPDP 2023 Ready
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Detail Panel -->
+  <div class="w-full lg:w-8/12 bg-slate-950 h-full overflow-y-auto relative" id="main-content">
+    
+    <!-- Empty State -->
+    <div id="details-empty" class="h-full flex flex-col justify-center items-center text-center p-12">
+      <div class="w-24 h-24 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl flex items-center justify-center mb-6 border border-slate-700 shadow-2xl">
+        <i class="fas fa-diagram-project text-4xl text-slate-600"></i>
+      </div>
+      <h3 class="text-2xl font-bold text-slate-300 mb-3">Execution Dashboard</h3>
+      <p class="text-slate-500 max-w-md mb-6">Select a scenario from the blueprint tree to view technical execution flows, NLU logic, conversation transcripts, and CRM write-backs.</p>
+      
+      <div class="grid grid-cols-2 gap-4 max-w-md w-full">
+        <div class="metric-card p-4 rounded-xl text-center">
+          <div class="text-2xl font-bold text-brand-blue">47</div>
+          <div class="text-xs text-slate-500 uppercase tracking-wider mt-1">Total Scenarios</div>
+        </div>
+        <div class="metric-card p-4 rounded-xl text-center">
+          <div class="text-2xl font-bold text-brand-green">8</div>
+          <div class="text-xs text-slate-500 uppercase tracking-wider mt-1">Phases</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content State -->
+    <div id="details-content" class="hidden min-h-full">
+      
+      <!-- Sticky Header -->
+      <div class="sticky top-0 z-20 bg-slate-950/90 backdrop-blur-xl border-b border-slate-800 px-8 py-6">
+        <div class="flex items-start justify-between">
+          <div>
+            <div class="flex items-center gap-3 mb-2">
+              <span id="detail-tag" class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border">Phase</span>
+              <span id="detail-scenario-badge" class="hidden px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border">Scenario</span>
+              <span id="detail-risk-badge" class="hidden px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/20">
+                <i class="fas fa-exclamation-triangle mr-1"></i>High Risk
+              </span>
+            </div>
+            <h2 id="detail-title" class="text-3xl font-bold text-white mb-2 tracking-tight"></h2>
+            <p id="detail-desc" class="text-slate-400"></p>
+          </div>
+          
+          <div class="flex gap-2">
+            <button onclick="simulateCall()" class="px-4 py-2 bg-brand-blue/10 hover:bg-brand-blue/20 text-brand-blue rounded-lg text-sm font-medium transition-all border border-brand-blue/30">
+              <i class="fas fa-play mr-2"></i>Simulate
+            </button>
+            <button onclick="copyScript()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-sm font-medium transition-all border border-slate-700">
+              <i class="fas fa-copy mr-2"></i>Copy
+            </button>
+          </div>
+        </div>
+        
+        <!-- Progress Indicator -->
+        <div class="mt-6 flex items-center gap-4 text-xs text-slate-500">
+          <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-brand-purple"></div>
+            <span>Pre-Call</span>
+          </div>
+          <div class="flex-1 progress-bar">
+            <div id="phase-progress" class="progress-fill" style="width: 0%"></div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span>Closure</span>
+            <div class="w-2 h-2 rounded-full bg-brand-green"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-8 space-y-8">
+        
+        <!-- Context Bar -->
+        <div class="glass-panel rounded-xl p-4 flex items-center justify-between fade-in">
+          <div class="flex items-center gap-6 text-sm">
+            <div>
+              <span class="text-slate-500 text-xs uppercase block">Customer</span>
+              <span class="text-slate-200 font-medium">Prasant Kumar</span>
+            </div>
+            <div>
+              <span class="text-slate-500 text-xs uppercase block">Policy</span>
+              <span class="text-slate-200 font-medium">SH-AX92 (Super Star)</span>
+            </div>
+            <div>
+              <span class="text-slate-500 text-xs uppercase block">Premium</span>
+              <span class="text-slate-200 font-medium">₹18,450</span>
+            </div>
+            <div id="context-claim-flag" class="hidden">
+              <span class="text-slate-500 text-xs uppercase block">Active Claim</span>
+              <span class="text-orange-400 font-medium"><i class="fas fa-hospital mr-1"></i>Yes</span>
+            </div>
+          </div>
+          <div class="intent-badge bg-slate-800 text-slate-300 border border-slate-700">
+            <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+            <span id="confidence-score">Confidence: 94%</span>
+          </div>
+        </div>
+
+        <!-- Technical Execution -->
+        <section class="fade-in">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="p-2 bg-brand-purple/10 rounded-lg border border-brand-purple/20">
+              <i class="fas fa-microchip text-brand-purple"></i>
+            </div>
+            <div>
+              <h4 class="text-sm font-bold text-slate-200 uppercase tracking-wider">Technical Execution</h4>
+              <p class="text-xs text-slate-500">API calls, logic flows, and system triggers</p>
+            </div>
+          </div>
+          <div class="glass-panel rounded-xl p-6 text-slate-300 text-sm leading-relaxed border-l-4 border-brand-purple" id="detail-tech">
+          </div>
+        </section>
+
+        <!-- NLU Analysis -->
+        <section class="fade-in" id="nlu-section">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="p-2 bg-brand-pink/10 rounded-lg border border-brand-pink/20">
+              <i class="fas fa-brain text-brand-pink"></i>
+            </div>
+            <div>
+              <h4 class="text-sm font-bold text-slate-200 uppercase tracking-wider">NLU Analysis</h4>
+              <p class="text-xs text-slate-500">Intent classification and entity extraction</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4" id="detail-nlu">
+          </div>
+        </section>
+
+        <!-- Conversation Transcript -->
+        <section class="fade-in">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="p-2 bg-brand-blue/10 rounded-lg border border-brand-blue/20">
+              <i class="fas fa-comments text-brand-blue"></i>
+            </div>
+            <div>
+              <h4 class="text-sm font-bold text-slate-200 uppercase tracking-wider">Conversation Transcript</h4>
+              <p class="text-xs text-slate-500">Voice interaction between Supriya (Bot) and Customer</p>
+            </div>
+          </div>
+          <div id="detail-script" class="space-y-1 pb-4">
+          </div>
+        </section>
+
+        <!-- Compliance Check -->
+        <section class="fade-in" id="compliance-section">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="p-2 bg-brand-teal/10 rounded-lg border border-brand-teal/20">
+              <i class="fas fa-shield-check text-brand-teal"></i>
+            </div>
+            <div>
+              <h4 class="text-sm font-bold text-slate-200 uppercase tracking-wider">Compliance Check</h4>
+              <p class="text-xs text-slate-500">IRDAI mandatory disclosures and prohibited statements</p>
+            </div>
+          </div>
+          <div class="glass-panel rounded-xl p-4 space-y-3" id="detail-compliance">
+          </div>
+        </section>
+
+        <!-- Outcome & Analytics -->
+        <section class="fade-in pb-12">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="p-2 bg-brand-green/10 rounded-lg border border-brand-green/20">
+                <i class="fas fa-chart-pie text-brand-green"></i>
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-slate-200 uppercase tracking-wider">Outcome & CRM Write-back</h4>
+                <p class="text-xs text-slate-500">Final disposition and data synchronization</p>
+              </div>
+            </div>
+            <div id="detail-outcome" class="glass-panel rounded-xl overflow-hidden border border-slate-800">
+            </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+<script>
+// --- COMPLETE DATA MODEL ---
+// All 47 scenarios across 8 phases
+
+const blueprintData = [
+  // PHASE 1: PRE-CALL INTELLIGENCE
+  {
+    id: 'p1', 
+    title: 'Phase 1: Pre-Call Intelligence', 
+    color: 'border-brand-purple',
+    bgColor: 'bg-purple-500/10 text-purple-400 border-purple-500/50',
+    progress: 12,
+    desc: 'Data ingestion, risk scoring, and session initialization before dialer triggers.',
+    scenarios: [
+      {
+        id: 'p1-s1',
+        title: 'P1-S1: Standard Renewal Load',
+        risk: 'low',
+        tech: `<strong>Data Sources:</strong> CRM + Policy DB + Claims DB<br><br>
+               <strong>Context Injected:</strong><br>
+               • Customer: Prasant Kumar, Age 45, English<br>
+               • Policy: SH-AX92 (Super Star Preferred)<br>
+               • Sum Insured: ₹10,00,000<br>
+               • Premium Due: ₹18,450 (incl GST)<br>
+               • Expiry: 28 Feb 2025<br>
+               • Renewal Count: 3<br>
+               • NCB: 25% (Claim-free)<br>
+               • Wellness Points: 450<br><br>
+               <strong>Risk Score:</strong> 15/100 (Low)<br>
+               <strong>API Latency:</strong> 0ms (Pre-loaded)`,
+        nlu: {
+          intent: 'SESSION_INIT',
+          confidence: '1.00',
+          entities: ['policy_number', 'expiry_date', 'premium_amount']
+        },
+        compliance: [
+          {type: 'check', text: 'Consent status verified in CRM'},
+          {type: 'check', text: 'DND status: False'},
+          {type: 'info', text: 'Language preference: English (detected)'}
+        ],
+        script: `
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">System Initialization (T-15 Days)</span>
+            Session ID: #SH-V-2025-884721<br>
+            Timestamp: 2025-02-13T10:00:00+05:30<br>
+            Trigger: T-15 Renewal Campaign<br>
+            Voice Persona: Supriya (Calm/Neutral/Indian English)<br>
+            Risk Flags: None<br>
+            Status: READY_TO_DIAL
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-green-400">
+{
+  "status": "READY_TO_DIAL",
+  "context_loaded": true,
+  "risk_score": 15,
+  "priority": "STANDARD",
+  "human_escalation_ready": false
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p1-s2',
+        title: 'P1-S2: Active Claim Detected',
+        risk: 'medium',
+        tech: `<strong>Trigger:</strong> active_claims.length > 0<br><br>
+               <strong>Claim Details:</strong><br>
+               • Claim ID: CLM-2025-00182<br>
+               • Hospital: Apollo Hospital, Bangalore<br>
+               • Admission: 2025-01-15<br>
+               • Status: Under Processing<br>
+               • Amount: ₹1,25,000<br>
+               • Ailment: Cardiac<br><br>
+               <strong>Bot Preparation:</strong><br>
+               • Load "Continuity Assurance" script<br>
+               • Flag: Do NOT predict claim outcome<br>
+               • Medical validation: Ensure no diagnosis advice<br>
+               • Risk Score adjusted: 15 → 35 (Medium)`,
+        nlu: {
+          intent: 'CLAIM_CONTEXT_LOAD',
+          confidence: '1.00',
+          entities: ['claim_id', 'hospital_name', 'claim_status']
+        },
+        compliance: [
+          {type: 'warning', text: 'Active claim: Must not predict approval/rejection'},
+          {type: 'check', text: 'Continuity messaging prepared'},
+          {type: 'info', text: 'Claim details verified with Claims DB'}
+        ],
+        script: `
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">Pre-Call Alert</span>
+            ⚠️ ACTIVE CLAIM DETECTED<br>
+            Policy: SH-AX92<br>
+            Claim: CLM-2025-00182<br>
+            Status: Under Processing<br>
+            <br>
+            Action: Load continuity assurance protocol<br>
+            Prohibited: Do not discuss claim outcome
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-orange-400">
+{
+  "status": "READY_TO_DIAL",
+  "context_loaded": true,
+  "active_claim": true,
+  "claim_id": "CLM-2025-00182",
+  "risk_score": 35,
+  "priority": "ATTENTION",
+  "script_variant": "CONTINUITY_ASSURANCE"
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p1-s3',
+        title: 'P1-S3: Grace Period Entry',
+        risk: 'high',
+        tech: `<strong>Trigger:</strong> Current date > Expiry date<br><br>
+               <strong>Grace Period Status:</strong><br>
+               • Expiry: 28 Jan 2025<br>
+               • Today: 10 Feb 2025 (Day 13 of 30)<br>
+               • Coverage Status: SUSPENDED<br>
+               • Reinstatement: Possible without medicals<br><br>
+               <strong>Bot Preparation:</strong><br>
+               • Urgency messaging: "Coverage suspended"<br>
+               • Medical check-up rule: Not required (<30 days)<br>
+               • Loading check: May apply if >30 days<br>
+               • Risk Score: 65 (High)`,
+        nlu: {
+          intent: 'GRACE_PERIOD_LOAD',
+          confidence: '1.00',
+          entities: ['lapse_days', 'reinstatement_eligible']
+        },
+        compliance: [
+          {type: 'warning', text: 'Grace period: Coverage suspended, not active'},
+          {type: 'check', text: 'Reinstatement rules loaded'},
+          {type: 'info', text: 'Medical check-up: Not required (Day 13/30)'}
+        ],
+        script: `
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">Grace Period Alert</span>
+            ⚠️ POLICY IN GRACE PERIOD<br>
+            Expired: 28 Jan 2025 (13 days ago)<br>
+            Grace Ends: 27 Feb 2025 (17 days left)<br>
+            Coverage: SUSPENDED<br>
+            Reinstatement: ELIGIBLE without medicals<br>
+            <br>
+            Urgency: HIGH - Emphasize coverage gap
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-red-400">
+{
+  "status": "GRACE_PERIOD_RENEWAL",
+  "context_loaded": true,
+  "expiry_date": "2025-01-28",
+  "days_in_grace": 13,
+  "coverage_status": "SUSPENDED",
+  "reinstatement_type": "WITHOUT_MEDICAL",
+  "risk_score": 65,
+  "priority": "URGENT"
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p1-s4',
+        title: 'P1-S4: High-Value Policy',
+        risk: 'medium',
+        tech: `<strong>Trigger:</strong> Sum Insured > ₹25L OR Premium > ₹50K<br><br>
+               <strong>Policy Profile:</strong><br>
+               • Customer: Vikram Mehta<br>
+               • Plan: Super Star Secure<br>
+               • Sum Insured: ₹50,00,000<br>
+               • Premium Due: ₹78,450<br>
+               • Renewal History: 5 years claim-free<br>
+               <br>
+               <strong>Bot Preparation:</strong><br>
+               • Flag: RETENTION_PRIORITY<br>
+               • Human agent standby<br>
+               • Personalized benefits recap<br>
+               • Dedicated relationship manager mention`,
+        nlu: {
+          intent: 'HIGH_VALUE_LOAD',
+          confidence: '1.00',
+          entities: ['sum_insured', 'premium_amount', 'customer_tier']
+        },
+        compliance: [
+          {type: 'check', text: 'High-value protocol activated'},
+          {type: 'info', text: 'Human escalation ready'},
+          {type: 'info', text: 'Retention offers pre-approved'}
+        ],
+        script: `
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">High-Value Customer Alert</span>
+            ⭐ VIP TIER DETECTED<br>
+            Customer: Vikram Mehta<br>
+            Policy Value: ₹50L Sum Insured<br>
+            Premium: ₹78,450<br>
+            History: 5 years claim-free<br>
+            <br>
+            Action: Human agent on standby<br>
+            Offers: Pre-approved wellness discount 20%
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-purple-400">
+{
+  "status": "HIGH_VALUE_RENEWAL",
+  "customer_tier": "VIP",
+  "sum_insured": 5000000,
+  "premium": 78450,
+  "risk_score": 40,
+  "priority": "RETENTION_FOCUS",
+  "human_escalation_ready": true
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p1-s5',
+        title: 'P1-S5: Senior Citizen Profile',
+        risk: 'medium',
+        tech: `<strong>Trigger:</strong> Age >= 60<br><br>
+               <strong>Profile:</strong><br>
+               • Customer: Ramesh Iyer, Age 68<br>
+               • Plan: Red Carpet (Senior Citizen)<br>
+               • Sum Insured: ₹10,00,000<br>
+               • Premium: ₹34,200<br>
+               • PED: Diabetes, Hypertension<br>
+               <br>
+               <strong>Bot Configuration:</strong><br>
+               • Speech rate: 90-110 WPM (slower)<br>
+               • No medical screening messaging<br>
+               • 30% co-pay explanation ready<br>
+               • EMI options prominently offered<br>
+               • Modern treatments highlight (10 covered)`,
+        nlu: {
+          intent: 'SENIOR_PROFILE_LOAD',
+          confidence: '1.00',
+          entities: ['age', 'plan_type', 'ped_conditions']
+        },
+        compliance: [
+          {type: 'check', text: 'Senior-friendly TTS configured'},
+          {type: 'info', text: 'Red Carpet benefits loaded'},
+          {type: 'warning', text: 'Co-pay: 30% for pre-existing conditions'}
+        ],
+        script: `
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">Senior Citizen Protocol</span>
+            👤 Age: 68 years<br>
+            Plan: Red Carpet (Senior Specialized)<br>
+            Speech Rate: Reduced (90-110 WPM)<br>
+            Medical Screening: Not required<br>
+            Co-pay: 30% for PED<br>
+            <br>
+            Special Benefits:<br>
+            • 10 Modern treatments covered<br>
+            • No maximum entry age<br>
+            • Guaranteed lifelong renewal
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-blue-400">
+{
+  "status": "SENIOR_RENEWAL",
+  "age": 68,
+  "plan": "RED_CARPET",
+  "speech_rate": "SLOW",
+  "risk_score": 35,
+  "priority": "STANDARD",
+  "special_protocol": "SENIOR_CITIZEN"
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p1-s6',
+        title: 'P1-S6: Corporate Group Exit',
+        risk: 'medium',
+        tech: `<strong>Trigger:</strong> previous_policy_type == "Group"<br><br>
+               <strong>Migration Context:</strong><br>
+               • Employee: Ananya Sharma<br>
+               • Previous: Corporate Group Cover (₹5L)<br>
+               • Current: Individual Super Star (₹10L)<br>
+               • Exit Date: 31 Jan 2025<br>
+               • Gap Risk: 28 days without coverage<br>
+               <br>
+               <strong>Bot Preparation:</strong><br>
+               • Migration context loaded<br>
+               • "Group coverage ended" messaging<br>
+               • Individual benefits vs group limitations<br>
+               • Portability certificate check`,
+        nlu: {
+          intent: 'GROUP_EXIT_LOAD',
+          confidence: '1.00',
+          entities: ['previous_policy_type', 'exit_date', 'gap_days']
+        },
+        compliance: [
+          {type: 'check', text: 'Group-to-individual migration context loaded'},
+          {type: 'info', text: 'Portability certificate status: Pending'},
+          {type: 'warning', text: 'Coverage gap risk: 28 days'}
+        ],
+        script: `
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">Group Exit Migration</span>
+            🔄 CORPORATE EXIT DETECTED<br>
+            Previous: Group Coverage (₹5L)<br>
+            Exit Date: 31 Jan 2025<br>
+            Current: Individual Policy (₹10L)<br>
+            Gap Risk: 28 days<br>
+            <br>
+            Messaging: Emphasize individual benefits<br>
+            Action: Check portability certificate
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-orange-400">
+{
+  "status": "GROUP_MIGRATION",
+  "previous_type": "GROUP",
+  "exit_date": "2025-01-31",
+  "gap_days": 28,
+  "risk_score": 45,
+  "priority": "MIGRATION_SUPPORT",
+  "portability_certificate": "PENDING"
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p1-s7',
+        title: 'P1-S7: Portability Window Risk',
+        risk: 'high',
+        tech: `<strong>Trigger:</strong> Days until expiry: 45-60<br><br>
+               <strong>Loyalty Context:</strong><br>
+               • Customer: 3 years with Star Health<br>
+               • Waiting Periods Served: 2 years PED<br>
+               • Competitor Approach: Detected (HDFC inquiry)<br>
+               • Portability Out Risk: HIGH<br>
+               <br>
+               <strong>Bot Preparation:</strong><br>
+               • Loyalty messaging: "3 years with us"<br>
+               • Waiting period protection emphasis<br>
+               • Wellness discount offer: Up to 20%<br>
+               • Retention specialist standby`,
+        nlu: {
+          intent: 'PORTABILITY_RISK_LOAD',
+          confidence: '1.00',
+          entities: ['tenure_years', 'waiting_periods_served', 'competitor_signals']
+        },
+        compliance: [
+          {type: 'warning', text: 'Competitor approach detected'},
+          {type: 'check', text: 'Loyalty benefits calculated'},
+          {type: 'info', text: 'Waiting period credit: 24 months served'}
+        ],
+        script: `
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">Portability Risk Alert</span>
+            ⚠️ COMPETITOR ACTIVITY DETECTED<br>
+            Customer Tenure: 3 years<br>
+            PED Waiting Served: 24/36 months<br>
+            Competitor: HDFC Ergo (inquiry logged)<br>
+            Risk: PORTABILITY_OUT<br>
+            <br>
+            Retention Offers Ready:<br>
+            • Wellness discount: 20% (₹3,690 off)<br>
+            • Loyalty bonus: Additional 5%
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-red-400">
+{
+  "status": "PORTABILITY_RISK",
+  "tenure_years": 3,
+  "waiting_periods_served": 24,
+  "competitor_approach": "HDFC_ERGO",
+  "risk_score": 75,
+  "priority": "RETENTION_URGENT",
+  "retention_offers": ["WELLNESS_20", "LOYALTY_5"]
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p1-s8',
+        title: 'P1-S8: Chronic Condition Management',
+        risk: 'medium',
+        tech: `<strong>Trigger:</strong> PED declared OR chronic conditions detected<br><br>
+               <strong>Health Profile:</strong><br>
+               • Customer: Prasant Kumar<br>
+               • PED: Diabetes Type 2 (declared 2022)<br>
+               • Waiting Period: 36 months<br>
+               • Served: 18 months<br>
+               • Remaining: 18 months<br>
+               <br>
+               <strong>Bot Preparation:</strong><br>
+               • PED waiting period status loaded<br>
+               • Continuity importance messaging<br>
+               • No reset assurance ready<br>
+               • Do NOT: Predict medical outcomes`,
+        nlu: {
+          intent: 'CHRONIC_CONDITION_LOAD',
+          confidence: '1.00',
+          entities: ['ped_type', 'waiting_period_total', 'waiting_period_served']
+        },
+        compliance: [
+          {type: 'check', text: 'PED status verified'},
+          {type: 'warning', text: 'Do not predict medical outcomes'},
+          {type: 'info', text: 'Waiting period credit: 18/36 months served'}
+        ],
+        script: `
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">Chronic Condition Protocol</span>
+            🏥 PED DETECTED<br>
+            Condition: Diabetes Type 2<br>
+            Waiting Period: 36 months<br>
+            Served: 18 months (50%)<br>
+            Remaining: 18 months<br>
+            <br>
+            Key Message:<br>
+            Continuity protects waiting period credit<br>
+            Lapse = Reset to 0 months
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-blue-400">
+{
+  "status": "CHRONIC_RENEWAL",
+  "ped": ["Diabetes_Type_2"],
+  "waiting_period_months": 36,
+  "served_months": 18,
+  "risk_score": 35,
+  "priority": "STANDARD",
+  "messaging": "CONTINUITY_PROTECTION"
+}</pre>
+          </div>`
+      }
+    ]
+  },
+
+  // PHASE 2: CALL OPENING & CONSENT
+  {
+    id: 'p2', 
+    title: 'Phase 2: Call Opening & Consent', 
+    color: 'border-brand-blue',
+    bgColor: 'bg-blue-500/10 text-blue-400 border-blue-500/50',
+    progress: 25,
+    desc: 'Identity verification, consent capture, and rapport building.',
+    scenarios: [
+      {
+        id: 'p2-s1',
+        title: 'P2-S1: Consent Granted',
+        risk: 'low',
+        tech: `<strong>Flow:</strong><br>
+               1. Identity verification<br>
+               2. Recording disclosure (IRDAI mandatory)<br>
+               3. Time check<br>
+               4. Barge-in enabled throughout<br><br>
+               <strong>NLU:</strong> Intent "consent" | Confidence: 0.98<br>
+               <strong>System:</strong> Start recording, log timestamp`,
+        nlu: {
+          intent: 'CONSENT_GRANTED',
+          confidence: '0.98',
+          entities: ['consent_type', 'time_suitable']
+        },
+        compliance: [
+          {type: 'check', text: 'Recording disclosure: Mandatory played'},
+          {type: 'check', text: 'Identity verification: Confirmed'},
+          {type: 'check', text: 'Time suitability: Confirmed'}
+        ],
+        script: `
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            Hello, am I speaking with Prasant Kumar?
+          </div>
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Prasant</span>
+            Yes, speaking.
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            This is Supriya calling from Star Health Insurance regarding your policy renewal. This call may be recorded for quality and compliance purposes. Is this a good time to speak?
+          </div>
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Prasant</span>
+            Yes, go ahead.
+          </div>
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">System Log</span>
+            Consent: GRANTED<br>
+            Recording: STARTED<br>
+            Timestamp: 2025-02-13T10:04:22+05:30<br>
+            Barge-in: ENABLED
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-green-400">
+{
+  "disposition": "CONSENT_GRANTED",
+  "recording_started": true,
+  "call_start": "2025-02-13T10:04:22",
+  "next_phase": "CONTEXT_SETUP"
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p2-s2',
+        title: 'P2-S2: Wrong Number',
+        risk: 'low',
+        tech: `<strong>Detection:</strong> Keywords "wrong number", "galat number"<br>
+               <strong>Action:</strong> CRM update, DND check, graceful exit<br>
+               <strong>NLU:</strong> Intent "wrong_number" | Confidence: 0.95`,
+        nlu: {
+          intent: 'WRONG_NUMBER',
+          confidence: '0.95',
+          entities: ['number_status']
+        },
+        compliance: [
+          {type: 'check', text: 'Apology rendered'},
+          {type: 'check', text: 'CRM marked: Wrong number'},
+          {type: 'info', text: 'Suppression list: Updated'}
+        ],
+        script: `
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            Hello, am I speaking with Prasant Kumar?
+          </div>
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Unknown</span>
+            Wrong number. Kiska number hai yeh?
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            I apologize for the inconvenience. I'll update our records immediately. You won't receive further calls on this number.
+          </div>
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">System Action</span>
+            CRM Update: Number invalid<br>
+            Disposition: WRONG_NUMBER<br>
+            Suppression: Active
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-slate-400">
+{
+  "disposition": "WRONG_NUMBER",
+  "crm_update": "NUMBER_INVALID",
+  "suppression_added": true,
+  "call_end": "IMMEDIATE"
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p2-s3',
+        title: 'P2-S3: DND/Not Interested',
+        risk: 'low',
+        tech: `<strong>Detection:</strong> Keywords "don't call", "DND", "unsubscribe"<br>
+               <strong>Mandatory:</strong> Must attempt value preservation for renewal<br>
+               <strong>Offer:</strong> Email/WhatsApp alternative<br>
+               <strong>NLU:</strong> Intent "dnd_request" | Confidence: 0.92`,
+        nlu: {
+          intent: 'DND_REQUEST',
+          confidence: '0.92',
+          entities: ['preference_channel']
+        },
+        compliance: [
+          {type: 'warning', text: 'DND request: Must offer alternative channel'},
+          {type: 'check', text: 'Suppression list: Will be updated'},
+          {type: 'info', text: 'Critical info: Policy expiry date communicated'}
+        ],
+        script: `
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            This is Supriya from Star Health regarding your policy renewal...
+          </div>
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Prasant</span>
+            Don't call me. Put me on DND.
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            I understand, and I'll update your preference immediately. However, this is regarding your policy SH-AX92 which expires on 28th February. For your continuity of coverage, would you prefer we communicate via email or WhatsApp instead?
+          </div>
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Prasant</span>
+            Just email.
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            Understood. I'll ensure all future communication is via email only. You'll receive renewal details shortly. Thank you.
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-orange-400">
+{
+  "disposition": "DND_REQUEST",
+  "suppression": {
+    "voice": true,
+    "sms": true,
+    "email": false,
+    "whatsapp": true
+  },
+  "alternative_channel": "EMAIL",
+  "policy_expiry_communicated": true
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p2-s4',
+        title: 'P2-S4: Call Back Requested',
+        risk: 'low',
+        tech: `<strong>Capture:</strong> Specific date and time slot<br>
+               <strong>Validation:</strong> Within business hours (9 AM - 7 PM)<br>
+               <strong>Confirmation:</strong> SMS with reference number<br>
+               <strong>NLU:</strong> Intent "callback_schedule" | Confidence: 0.88`,
+        nlu: {
+          intent: 'CALLBACK_SCHEDULE',
+          confidence: '0.88',
+          entities: ['preferred_date', 'preferred_time']
+        },
+        compliance: [
+          {type: 'check', text: 'Callback scheduled within 48 hours'},
+          {type: 'check', text: 'SMS confirmation sent'},
+          {type: 'info', text: 'Reference number generated'}
+        ],
+        script: `
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            This is Supriya from Star Health...
+          </div>
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Prasant</span>
+            I'm in a meeting. Call me back.
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            Of course. When would be convenient? I can call you today between 2-4 PM, or tomorrow morning between 10-12 PM?
+          </div>
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Prasant</span>
+            Tomorrow morning.
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            Confirmed. I'll call you tomorrow, 14th February, between 10 AM and 12 PM. You'll receive an SMS reminder 2 hours prior with reference number CB-2025-8847. Is there anything else?
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-blue-400">
+{
+  "disposition": "CALLBACK_SCHEDULED",
+  "callback_datetime": "2025-02-14T10:00:00",
+  "reference": "CB-2025-8847",
+  "reminder_sms": "SCHEDULED",
+  "priority": "HIGH (Expiry proximity)"
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p2-s5',
+        title: 'P2-S5: Third Party Answering',
+        risk: 'medium',
+        tech: `<strong>Detection:</strong> "He's not home", "Who is this?"<br>
+               <strong>Verification:</strong> Relationship to policyholder<br>
+               <strong>Authority:</strong> Check if authorized to discuss<br>
+               <strong>NLU:</strong> Intent "third_party" | Confidence: 0.85`,
+        nlu: {
+          intent: 'THIRD_PARTY',
+          confidence: '0.85',
+          entities: ['relationship', 'authorization_status']
+        },
+        compliance: [
+          {type: 'warning', text: 'Verify relationship before sharing policy details'},
+          {type: 'check', text: 'Data privacy: Limited disclosure'},
+          {type: 'info', text: 'Authorization: Recorded if provided'}
+        ],
+        script: `
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            Hello, am I speaking with Prasant Kumar?
+          </div>
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Wife</span>
+            He's not home. I'm his wife.
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            Thank you. Are you authorized to discuss the policy renewal on his behalf?
+          </div>
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Wife</span>
+            Yes, I handle all his insurance.
+          </div>
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">Verification</span>
+            Relationship: Spouse<br>
+            Authorization: Claimed<br>
+            Action: Continue with standard verification
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-yellow-400">
+{
+  "disposition": "THIRD_PARTY_AUTHORIZED",
+  "relationship": "SPOUSE",
+  "authorization": "CLAIMED",
+  "verification_required": true,
+  "continue_call": true
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p2-s6',
+        title: 'P2-S6: Language Mismatch',
+        risk: 'medium',
+        tech: `<strong>Detection:</strong> ASR confidence < 0.4, non-English keywords<br>
+               <strong>Switch:</strong> Offer Hindi, Tamil, Telugu, Kannada, Marathi<br>
+               <strong>Fallback:</strong> Schedule callback with language agent<br>
+               <strong>NLU:</strong> Intent "language_switch" | Confidence: N/A`,
+        nlu: {
+          intent: 'LANGUAGE_SWITCH',
+          confidence: 'N/A',
+          entities: ['detected_language', 'preferred_language']
+        },
+        compliance: [
+          {type: 'check', text: 'Language preference: Updated in CRM'},
+          {type: 'info', text: 'Regional agent: Assigned if available'},
+          {type: 'info', text: 'Script: Verified for cultural appropriateness'}
+        ],
+        script: `
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            Hello, this is Supriya from Star Health...
+          </div>
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Prasant</span>
+            Hindi mein baat karo. English nahi aati.
+          </div>
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">ASR Detection</span>
+            Language: Hindi detected<br>
+            Confidence: 0.95<br>
+            Action: Switch to Hindi bot instance
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot) - Hindi</span>
+            Namaste. Main Supriya, Star Health Insurance se baat kar rahi hoon. Kya main Hindi mein jaankari de sakti hoon?
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-purple-400">
+{
+  "disposition": "LANGUAGE_SWITCHED",
+  "from_language": "ENGLISH",
+  "to_language": "HINDI",
+  "bot_instance": "HI-SUPRIYA-01",
+  "crm_updated": true
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p2-s7',
+        title: 'P2-S7: Suspicious/Verification Request',
+        risk: 'medium',
+        tech: `<strong>Trigger:</strong> "How do I know you're from Star?"<br>
+               <strong>Response:</strong> Verification code + official number<br>
+               <strong>Do NOT:</strong> Ask for OTP or sensitive data<br>
+               <strong>NLU:</strong> Intent "verification_request" | Confidence: 0.90`,
+        nlu: {
+          intent: 'VERIFICATION_REQUEST',
+          confidence: '0.90',
+          entities: ['suspicion_level']
+        },
+        compliance: [
+          {type: 'check', text: 'Verification code: Generated'},
+          {type: 'warning', text: 'Never ask for customer OTP/password'},
+          {type: 'check', text: 'Official helpline: Communicated'}
+        ],
+        script: `
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            This is Supriya from Star Health regarding your policy...
+          </div>
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Prasant</span>
+            How do I know you're really from Star Health? This could be a scam.
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            Your concern is completely valid. You can verify this call by:
+            <br><br>
+            1. Calling our official number <strong>1800-425-2255</strong> and quoting reference <strong>V-2025-884721</strong>
+            <br>
+            2. I'll send an SMS from <strong>STARHEALTH</strong> right now. Please check your phone.
+          </div>
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">Verification SMS Sent</span>
+            From: STARHEALTH<br>
+            Content: "Star Health verification code: 884721. Call 1800-425-2255 to confirm. Never share OTPs."
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-blue-400">
+{
+  "disposition": "VERIFICATION_PROVIDED",
+  "verification_code": "884721",
+  "sms_sent": true,
+  "customer_action": "CALL_BACK_CONFIRMATION",
+  "trust_score": "VERIFICATION_PENDING"
+}</pre>
+          </div>`
+      }
+    ]
+  },
+
+  // PHASE 3: CONTEXT SETUP
+  {
+    id: 'p3', 
+    title: 'Phase 3: Context Setup', 
+    color: 'border-brand-blue',
+    bgColor: 'bg-blue-500/10 text-blue-400 border-blue-500/50',
+    progress: 37,
+    desc: 'Establishing value proposition and current policy status.',
+    scenarios: [
+      {
+        id: 'p3-s1',
+        title: 'P3-S1: Standard Policy Recap',
+        risk: 'low',
+        tech: `<strong>Delivery:</strong> TTS with variable injection<br>
+               <strong>Pause:</strong> 2 seconds for customer processing<br>
+               <strong>No API calls:</strong> All data pre-loaded<br>
+               <strong>Key elements:</strong> Expiry, SI, benefits`,
+        nlu: {
+          intent: 'CONTEXT_DELIVERY',
+          confidence: '1.00',
+          entities: ['policy_details']
+        },
+        compliance: [
+          {type: 'check', text: 'Sum insured: Clearly stated'},
+          {type: 'check', text: 'Expiry date: Specific (28 Feb 2025)'},
+          {type: 'check', text: 'Benefits: Accurate to plan variant'}
+        ],
+        script: `
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            Thank you Prasant. Your Star Health <strong>Super Star</strong> policy ending with <strong>AX92</strong> is expiring on <strong>28th February 2025</strong>. This policy provides medical coverage of <strong>ten lakh rupees</strong> for you and your family, with <strong>unlimited automatic restoration</strong> and <strong>no room rent limits</strong>.
+          </div>
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">System Pause</span>
+            Duration: 2000ms<br>
+            Expected: Customer acknowledgment or silence<br>
+            Next: Intent capture
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-blue-400">
+{
+  "step": "CONTEXT_DELIVERED",
+  "tts_variables": {
+    "plan_name": "Super Star",
+    "policy_tail": "AX92",
+    "expiry": "28 Feb 2025",
+    "sum_insured": "10,00,000",
+    "key_benefits": ["unlimited_restoration", "no_room_rent_limit"]
+  },
+  "user_ack": "pending"
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p3-s2',
+        title: 'P3-S2: Disputes Policy Details',
+        risk: 'medium',
+        tech: `<strong>Detection:</strong> "My sum insured is wrong", "Not 10 lakhs"<br>
+               <strong>Action:</strong> Real-time verification, no argument<br>
+               <strong>Escalation:</strong> If discrepancy confirmed<br>
+               <strong>NLU:</strong> Intent "data_discrepancy" | Confidence: 0.87`,
+        nlu: {
+          intent: 'DATA_DISCREPANCY',
+          confidence: '0.87',
+          entities: ['disputed_field', 'customer_claimed_value']
+        },
+        compliance: [
+          {type: 'warning', text: 'Do not argue with customer'},
+          {type: 'check', text: 'Real-time verification: Triggered'},
+          {type: 'info', text: 'Escalation: Ready if needed'}
+        ],
+        script: `
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            Your policy provides coverage of ten lakh rupees...
+          </div>
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Prasant</span>
+            No, I upgraded to 15 lakhs last year. Your records are wrong.
+          </div>
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">Real-time Verification</span>
+            Querying Policy DB...<br>
+            Customer Claim: ₹15,00,000<br>
+              System Record: ₹10,00,000<br>
+            Status: DISCREPANCY_DETECTED
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            I apologize for the confusion. Let me verify this immediately with our records. You're right to flag this - if you upgraded recently, the system may be showing the previous amount. Let me connect you with a policy specialist who can confirm your current coverage and process the renewal correctly.
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-red-400">
+{
+  "disposition": "DATA_DISCREPANCY",
+  "disputed_field": "sum_insured",
+  "customer_claim": 1500000,
+  "system_record": 1000000,
+  "action": "HUMAN_VERIFICATION",
+  "priority": "HIGH"
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p3-s3',
+        title: 'P3-S3: Already Renewed',
+        risk: 'low',
+        tech: `<strong>Detection:</strong> "I paid yesterday", "Already done"<br>
+               <strong>Verification:</strong> Real-time payment status API<br>
+               <strong>Grace:</strong> Thank even if not yet reflected<br>
+               <strong>NLU:</strong> Intent "already_renewed" | Confidence: 0.91`,
+        nlu: {
+          intent: 'ALREADY_RENEWED',
+          confidence: '0.91',
+          entities: ['payment_reference']
+        },
+        compliance: [
+          {type: 'check', text: 'Payment status: Verified in real-time'},
+          {type: 'info', text: 'Document dispatch: Confirmed timeline'},
+          {type: 'check', text: 'Customer appreciation: Expressed'}
+        ],
+        script: `
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            Your policy is expiring on 28th February...
+          </div>
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Prasant</span>
+            I already paid yesterday online.
+          </div>
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">Payment Verification</span>
+            Querying: Payment Gateway + CRM<br>
+            Status: PAYMENT_FOUND<br>
+            Amount: ₹18,450<br>
+            Date: 2025-02-12<br>
+            Ref: PAY-2025-8819
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            Thank you for confirming, Prasant. I can see your payment of ₹18,450 received yesterday. Your policy is renewed and active. You should receive the updated policy document within 2 hours via email. Is there anything else I can help you with?
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-green-400">
+{
+  "disposition": "ALREADY_RENEWED",
+  "payment_verified": true,
+  "payment_date": "2025-02-12",
+  "amount": 18450,
+  "policy_status": "ACTIVE",
+  "document_dispatch": "WITHIN_2_HOURS"
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p3-s4',
+        title: 'P3-S4: Policy Changes Needed',
+        risk: 'medium',
+        tech: `<strong>Detection:</strong> "Add newborn", "Include parents", "Change address"<br>
+               <strong>Scope:</strong> Mid-term endorsement vs renewal upgrade<br>
+               <strong>Routing:</strong> Customer service (not sales)<br>
+               <strong>NLU:</strong> Intent "endorsement_request" | Confidence: 0.89`,
+        nlu: {
+          intent: 'ENDORSEMENT_REQUEST',
+          confidence: '0.89',
+          entities: ['change_type', 'affected_members']
+        },
+        compliance: [
+          {type: 'warning', text: 'Mid-term changes: May affect waiting periods'},
+          {type: 'check', text: 'Service team: Routed (not sales)'},
+          {type: 'info', text: 'Renewal: Can proceed separately'}
+        ],
+        script: `
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            Your Super Star policy provides...
+          </div>
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Prasant</span>
+            I need to add my newborn baby to the policy.
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            Congratulations! Adding a newborn is important. However, this requires a policy modification which is best handled by our service team to ensure the waiting periods are correctly applied and the premium is accurately calculated.
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            I can either:<br>
+            1. Connect you to the service team now for immediate addition<br>
+            2. Process your standard renewal now, and you can add the baby within 30 days of birth<br>
+            <br>
+            Which would you prefer?
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-orange-400">
+{
+  "disposition": "ENDORSEMENT_REQUIRED",
+  "change_type": "NEWBORN_ADDITION",
+  "routing": "CUSTOMER_SERVICE",
+  "renewal_option": "PROCEED_SEPARATELY",
+  "waiting_period_applicable": true
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p3-s5',
+        title: 'P3-S5: Unaware of Expiry',
+        risk: 'medium',
+        tech: `<strong>Detection:</strong> "I didn't know", "No reminder", "First time hearing"<br>
+               <strong>Education:</strong> Grace period explanation<br>
+               <strong>Urgency:</strong> Emphasize coverage gap<br>
+               <strong>NLU:</strong> Intent "unaware_expiry" | Confidence: 0.86`,
+        nlu: {
+          intent: 'UNAWARE_EXPIRY',
+          confidence: '0.86',
+          entities: ['awareness_level']
+        },
+        compliance: [
+          {type: 'check', text: 'Grace period: Explained clearly'},
+          {type: 'warning', text: 'Coverage gap: Disclosed (no claims during grace)'},
+          {type: 'info', text: 'Reminder service: Acknowledged gap'}
+        ],
+        script: `
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            Your policy is expiring on 28th February...
+          </div>
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Prasant</span>
+            I didn't know it was expiring. I didn't get any reminder.
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            I apologize if our previous reminders didn't reach you. Your policy expires in 15 days on 28th February. The good news is you have a 30-day grace period after expiry, but please note that any hospitalization during the grace period will not be covered.
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            To ensure you're fully protected, I recommend renewing today. The process takes just 2 minutes. Would you like me to proceed?
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-yellow-400">
+{
+  "disposition": "UNAWARE_EXPIRY",
+  "education_provided": true,
+  "grace_period_explained": true,
+  "coverage_gap_warning": true,
+  "urgency_level": "HIGH",
+  "next_action": "RENEWAL_ATTEMPT"
+}</pre>
+          </div>`
+      }
+    ]
+  },
+
+  // PHASE 4: INTENT CAPTURE
+  {
+    id: 'p4', 
+    title: 'Phase 4: Intent Capture', 
+    color: 'border-brand-orange',
+    bgColor: 'bg-orange-500/10 text-orange-400 border-orange-500/50',
+    progress: 50,
+    desc: 'Critical decision tree node. Classifying user intent to route flow.',
+    scenarios: [
+      {
+        id: 'p4-s1',
+        title: 'P4-S1: Immediate Renewal Intent',
+        risk: 'low',
+        tech: `<strong>Trigger:</strong> "Yes, renew now", "Let's do it"<br>
+               <strong>Confidence:</strong> >0.90<br>
+               <strong>Check:</strong> Active claim flag<br>
+               <strong>Route:</strong> Phase 6 (Payment) or Phase 5 (Objection)`,
+        nlu: {
+          intent: 'RENEW_NOW',
+          confidence: '0.94',
+          entities: ['urgency_indicator']
+        },
+        compliance: [
+          {type: 'check', text: 'Forced choice: Presented clearly'},
+          {type: 'check', text: 'Intent: High confidence confirmed'},
+          {type: 'info', text: 'Route: Based on context flags'}
+        ],
+        script: `
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            To help you better, please let me know: Would you like to renew now, should I schedule a call back, or are you not planning to renew this year?
+          </div>
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Prasant</span>
+            Yes, I want to renew now.
+          </div>
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">NLU Analysis</span>
+            Intent: RENEW_NOW<br>
+            Confidence: 0.94<br>
+            Entity: "renew" + "now"<br>
+            Sentiment: Positive<br>
+            Action: CHECK_CONTEXT_FLAGS
+          </div>
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">Context Check</span>
+            Active Claim: FALSE<br>
+            Grace Period: FALSE<br>
+            Route: PAYMENT_FLOW (Phase 6)
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-green-400">
+{
+  "intent": "RENEW_NOW",
+  "confidence": 0.94,
+  "sentiment": "POSITIVE",
+  "context_flags": {
+    "active_claim": false,
+    "grace_period": false
+  },
+  "route": "PHASE_6_PAYMENT",
+  "disposition": "INTENT_RENEWAL"
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p4-s2',
+        title: 'P4-S2: Conditional Renewal (Active Claim)',
+        risk: 'medium',
+        tech: `<strong>Trigger:</strong> "Renew but have claim"<br>
+               <strong>Confidence:</strong> 0.85 (compound intent)<br>
+               <strong>Action:</strong> Route to P5-S1 (Active Claim Objection)<br>
+               <strong>Key:</strong> Continuity assurance`,
+        nlu: {
+          intent: 'RENEW_CONDITIONAL',
+          confidence: '0.85',
+          entities: ['condition_type', 'objection_category']
+        },
+        compliance: [
+          {type: 'check', text: 'Compound intent: Parsed correctly'},
+          {type: 'info', text: 'Objection detected: Active claim'},
+          {type: 'check', text: 'Route: Objection handling phase'}
+        ],
+        script: `
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            Would you like to renew now, schedule a callback, or not renew?
+          </div>
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Prasant</span>
+            I want to renew, but I have a claim going on right now at Apollo Hospital.
+          </div>
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">NLU Analysis</span>
+            Primary Intent: RENEW_NOW (0.89)<br>
+            Secondary Intent: OBJECTION_QUERY (0.85)<br>
+            Entity: "claim" + "Apollo Hospital"<br>
+            Context Match: Active claim found<br>
+            Route: P5-S1 (Active Claim Handler)
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-orange-400">
+{
+  "intent": "RENEW_CONDITIONAL",
+  "confidence": 0.85,
+  "primary_intent": "RENEW_NOW",
+  "objection": "ACTIVE_CLAIM",
+  "route": "PHASE_5_OBJECTION",
+  "handler": "P5-S1_ACTIVE_CLAIM"
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p4-s3',
+        title: 'P4-S3: Upgrade Request',
+        risk: 'low',
+        tech: `<strong>Trigger:</strong> "Want higher coverage", "₹10L is less"<br>
+               <strong>Confidence:</strong> >0.85<br>
+               <strong>Complexity:</strong> New waiting periods may apply<br>
+               <strong>Route:</strong> Human agent (upsell)`,
+        nlu: {
+          intent: 'UPGRADE_REQUEST',
+          confidence: '0.88',
+          entities: ['current_si', 'desired_si']
+        },
+        compliance: [
+          {type: 'warning', text: 'Upgrade: New waiting periods may apply'},
+          {type: 'check', text: 'Agent routing: Complex pricing'},
+          {type: 'info', text: 'Current benefits: Protected if renewed'}
+        ],
+        script: `
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            Would you like to renew now...?
+          </div>
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Prasant</span>
+            I want to upgrade to 25 lakhs. 10 lakhs is not enough now.
+          </div>
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">Upsell Detection</span>
+            Current SI: ₹10,00,000<br>
+            Desired SI: ₹25,00,000<br>
+            Premium Estimate: ₹42,000<br>
+            Complexity: HIGH (New waiting periods)<br>
+            Route: AGENT_UPSELL
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            Upgrading to ₹25 lakhs is a wise decision. However, this involves calculating new premiums and understanding if any additional waiting periods apply to the enhanced coverage. Let me connect you with a senior advisor who can explain the upgrade benefits and process this for you immediately.
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-purple-400">
+{
+  "intent": "UPGRADE_REQUEST",
+  "confidence": 0.88,
+  "current_si": 1000000,
+  "desired_si": 2500000,
+  "estimated_premium": 42000,
+  "route": "AGENT_UPSELL",
+  "complexity": "HIGH",
+  "disposition": "UPGRADE_ESCALATION"
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p4-s4',
+        title: 'P4-S4: Explicit Cancel/Churn',
+        risk: 'high',
+        tech: `<strong>Trigger:</strong> "Cancel", "Discontinue", "Don't want"<br>
+               <strong>Confidence:</strong> >0.90<br>
+               <strong>Action:</strong> Trigger retention protocol<br>
+               <strong>Probe:</strong> "What prompted this decision?"`,
+        nlu: {
+          intent: 'CHURN_EXPLICIT',
+          confidence: '0.93',
+          entities: ['churn_indicator']
+        },
+        compliance: [
+          {type: 'warning', text: 'Churn risk: HIGH'},
+          {type: 'check', text: 'Retention protocol: Activated'},
+          {type: 'info', text: 'Reason probe: Mandatory'}
+        ],
+        script: `
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            ...are you not planning to renew this year?
+          </div>
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Prasant</span>
+            I don't want to continue. Please cancel my policy.
+          </div>
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">Alert Triggered</span>
+            Keywords: "cancel", "don't want"<br>
+            Sentiment: -0.75 (Negative)<br>
+            Confidence: 0.93<br>
+            Action: RETENTION_PROTOCOL
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            I understand, Prasant. Before we proceed, may I ask what prompted this decision? Was it the premium, a service issue, or have you found a better option elsewhere? Your feedback helps us serve you better.
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-red-400">
+{
+  "intent": "CHURN_EXPLICIT",
+  "confidence": 0.93,
+  "sentiment": -0.75,
+  "retention_protocol": "ACTIVATED",
+  "probe_question": "CHURN_REASON",
+  "risk_score": 85,
+  "human_escalation_ready": true
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p4-s5',
+        title: 'P4-S5: Competitor Switch Intent',
+        risk: 'high',
+        tech: `<strong>Trigger:</strong> "Moving to HDFC", "ICICI better", "Porting out"<br>
+               <strong>Confidence:</strong> >0.85<br>
+               <strong>Strategy:</strong> Portability counter + Value reinforcement<br>
+               <strong>Offer:</strong> Waiting period protection emphasis`,
+        nlu: {
+          intent: 'CHURN_COMPETITOR',
+          confidence: '0.91',
+          entities: ['competitor_name', 'switch_reason']
+        },
+        compliance: [
+          {type: 'warning', text: 'Competitor mentioned: Retention critical'},
+          {type: 'check', text: 'Portability rights: Explained'},
+          {type: 'info', text: 'Waiting period credit: Emphasized'}
+        ],
+        script: `
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            ...or are you not planning to renew?
+          </div>
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Prasant</span>
+            I'm moving to HDFC Ergo. Their premium is lower.
+          </div>
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">Competitor Alert</span>
+            Competitor: HDFC Ergo<br>
+            Reason: PRICE<br>
+            Tenure: 3 years (Waiting periods served)<br>
+            Risk: PORTABILITY_OUT<br>
+            Counter: Value + Waiting period protection
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            I respect your decision to compare, Prasant. You have the right to port to any insurer. Just to ensure you don't lose benefits you've earned - you've served 2 years of waiting periods with us. When you port, these transfer, but our specialized benefits like unlimited restoration and in-house claims processing may not be available elsewhere.
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            Before you decide, can I have a senior advisor explain the specific differences? This 10-minute conversation could save you from coverage gaps. Shall I schedule that?
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-red-400">
+{
+  "intent": "CHURN_COMPETITOR",
+  "confidence": 0.91,
+  "competitor": "HDFC_ERGO",
+  "churn_reason": "PRICE",
+  "tenure_years": 3,
+  "waiting_periods_served": 24,
+  "retention_offer": "SENIOR_ADVISOR_CALL",
+  "risk_score": 80,
+  "disposition": "COMPETITOR_RETENTION_ATTEMPT"
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p4-s6',
+        title: 'P4-S6: Price Churn',
+        risk: 'high',
+        tech: `<strong>Trigger:</strong> "Too expensive", "Can't afford", "Budget nahi"<br>
+               <strong>Confidence:</strong> >0.80<br>
+               <strong>Offers:</strong> EMI, Wellness discount, Smart Network<br>
+               <strong>Tax:</strong> Section 80D benefit reminder`,
+        nlu: {
+          intent: 'CHURN_PRICE',
+          confidence: '0.87',
+          entities: ['price_sensitivity_score']
+        },
+        compliance: [
+          {type: 'check', text: 'EMI option: Offered'},
+          {type: 'check', text: 'Wellness discount: Calculated'},
+          {type: 'info', text: 'Tax benefit: 80D communicated'}
+        ],
+        script: `
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            Would you like to renew now...?
+          </div>
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Prasant</span>
+            18,000 is too expensive. I can't afford it this year.
+          </div>
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">Price Sensitivity</span>
+            Premium: ₹18,450<br>
+            Sensitivity Score: 0.89 (High)<br>
+            Available Offers:<br>
+            - EMI: ₹1,538/month<br>
+            - Wellness: 450 pts = ₹900 off<br>
+            - Smart Network: 15% = ₹2,767 off<br>
+            - Tax Benefit: ₹5,400 (30% bracket)
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            I understand budget is key. Let me help with options:<br><br>
+            <strong>Option 1 - EMI:</strong> Pay ₹1,538/month instead of lump sum<br>
+            <strong>Option 2 - Wellness Discount:</strong> You have 450 points = ₹900 off immediately<br>
+            <strong>Option 3 - Smart Network:</strong> 15% discount at 3,000+ hospitals = ₹2,767 off<br>
+            <strong>Plus:</strong> Save up to ₹5,400 in taxes under Section 80D
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-orange-400">
+{
+  "intent": "CHURN_PRICE",
+  "confidence": 0.87,
+  "sensitivity_score": 0.89,
+  "offers_made": ["EMI", "WELLNESS_DISCOUNT", "SMART_NETWORK", "TAX_BENEFIT"],
+  "effective_premium_after_discounts": 13783,
+  "route": "RETENTION_PRICE",
+  "disposition": "PRICE_OBJECTION_HANDLED"
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p4-s7',
+        title: 'P4-S7: No Need Perceived',
+        risk: 'medium',
+        tech: `<strong>Trigger:</strong> "I'm healthy", "Don't need", "Waste of money"<br>
+               <strong>Strategy:</strong> Loss aversion + Risk education<br>
+               <strong>Key:</strong> NCB loss, Waiting period reset, Future cost<br>
+               <strong>Avoid:</strong> Fear-mongering`,
+        nlu: {
+          intent: 'CHURN_NO_NEED',
+          confidence: '0.84',
+          entities: ['health_perception']
+        },
+        compliance: [
+          {type: 'check', text: 'Risk education: Factual, not fear-based'},
+          {type: 'check', text: 'Loss aversion: NCB + Waiting periods'},
+          {type: 'info', text: 'Future cost: Age-based premium increase'}
+        ],
+        script: `
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            ...are you not planning to renew?
+          </div>
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Prasant</span>
+            I'm healthy, I don't need insurance right now. Maybe later.
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            I'm glad you're healthy, Prasant. That's actually the best time to have insurance - it ensures you're covered when you need it. If you let this policy lapse, you'll lose important benefits you've built:
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            1. <strong>No Claim Bonus:</strong> You lose 25% discount (₹4,612)<br>
+            2. <strong>Waiting Periods:</strong> Your 2 years PED credit resets to zero<br>
+            3. <strong>Future Cost:</strong> At age 50, premium will be 40% higher<br>
+            4. <strong>Coverage Gap:</strong> Any hospitalization during gap is uninsured
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-yellow-400">
+{
+  "intent": "CHURN_NO_NEED",
+  "confidence": 0.84,
+  "education_provided": true,
+  "loss_aversion_triggered": ["NCB", "WAITING_PERIODS", "FUTURE_COST"],
+  "risk_score": 60,
+  "route": "EDUCATION_RETRY",
+  "disposition": "HEALTHY_BUT_UNINSURED_RISK"
+}</pre>
+          </div>`
+      }
+    ]
+  },
+
+  // PHASE 5: OBJECTION HANDLING
+  {
+    id: 'p5', 
+    title: 'Phase 5: Objection Handling', 
+    color: 'border-brand-orange',
+    bgColor: 'bg-orange-500/10 text-orange-400 border-orange-500/50',
+    progress: 62,
+    desc: 'Handling objections: Active claims, price, service, competitors.',
+    scenarios: [
+      {
+        id: 'p5-s1',
+        title: 'P5-S1: Active Claim Objection',
+        risk: 'medium',
+        tech: `<strong>Context:</strong> Customer has ongoing claim<br>
+               <strong>Key Message:</strong> Continuity assurance<br>
+               <strong>Prohibited:</strong> Predicting claim outcome<br>
+               <strong>Assurance:</strong> Claim continues, waiting periods protected`,
+        nlu: {
+          intent: 'OBJECTION_ACTIVE_CLAIM',
+          confidence: '0.92',
+          entities: ['hospital_name', 'claim_status']
+        },
+        compliance: [
+          {type: 'warning', text: 'DO NOT predict claim approval/rejection'},
+          {type: 'check', text: 'Continuity: Clearly explained'},
+          {type: 'check', text: 'Claim status: Factual only'}
+        ],
+        script: `
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Prasant</span>
+            I want to renew, but I have a claim going on at Apollo Hospital.
+          </div>
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">Context Match</span>
+            Active Claim: CLM-2025-00182<br>
+            Hospital: Apollo Hospital<br>
+            Status: Under Processing<br>
+            Handler: CONTINUITY_ASSURANCE
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            Understood, Prasant. Just to clarify - your ongoing claim at Apollo Hospital will continue to be processed as usual. Renewing your policy ensures:
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            ✓ <strong>Continuity of benefits</strong> for future treatments<br>
+            ✓ <strong>Your waiting period credit is protected</strong> (18 months served)<br>
+            ✓ <strong>No impact on current claim processing</strong><br>
+            <br>
+            Your current claim and renewal are completely separate. Would you like me to proceed?
+          </div>
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Prasant</span>
+            Okay, proceed then.
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-green-400">
+{
+  "objection": "ACTIVE_CLAIM",
+  "resolution": "CONTINUITY_ASSURANCE",
+  "prohibited_statements_avoided": true,
+  "claim_outcome_prediction": false,
+  "customer_proceed": true,
+  "route": "PHASE_6_PAYMENT",
+  "disposition": "OBJECTION_RESOLVED"
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p5-s2',
+        title: 'P5-S2: Service Quality Complaint',
+        risk: 'high',
+        tech: `<strong>Trigger:</strong> "Last claim rejected", "Service is bad", "No response"<br>
+               <strong>Strategy:</strong> Empathy + Immediate escalation<br>
+               <strong>Do NOT:</strong> Defend or justify<br>
+               <strong>Action:</strong> Warm transfer to grievance officer`,
+        nlu: {
+          intent: 'OBJECTION_SERVICE',
+          confidence: '0.89',
+          entities: ['complaint_type', 'grievance_level']
+        },
+        compliance: [
+          {type: 'warning', text: 'Service complaint: No defense, only empathy'},
+          {type: 'check', text: 'Grievance officer: Immediate transfer'},
+          {type: 'check', text: 'Warm transfer: Context passed'}
+        ],
+        script: `
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Prasant</span>
+            I don't want to renew. Your service is terrible. My last claim took 45 days and you rejected it without reason.
+          </div>
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">Grievance Detection</span>
+            Keywords: "rejected", "45 days", "terrible"<br>
+            Sentiment: -0.82 (Very Negative)<br>
+            Previous Claim: CLM-2024-00891<br>
+            Status: Rejected<br>
+            Action: IMMEDIATE_ESCALATION
+          </div>
+          <div class="script-bubble bot-bubble" style="border-left-color: #ef4444;">
+            <span class="label-bot">Supriya (Bot)</span>
+            I'm truly sorry to hear about your experience, Prasant. A 45-day delay and rejection without clear communication is not the service we strive to provide. I completely understand your frustration.
+          </div>
+          <div class="script-bubble bot-bubble" style="border-left-color: #a855f7;">
+            <span class="label-bot">Supriya → Senior Grievance Officer</span>
+            I'm connecting you immediately with our Senior Grievance Officer who will:<br>
+            1. Review your claim case CLM-2024-00891<br>
+            2. Explain the rejection reason and re-evaluate if warranted<br>
+            3. Ensure your renewal process is seamless if you choose to continue<br>
+            <br>
+            Please hold while I transfer you with your complete history.
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-red-400">
+{
+  "objection": "SERVICE_QUALITY",
+  "grievance_level": "HIGH",
+  "sentiment": -0.82,
+  "previous_claim": "CLM-2024-00891",
+  "action": "WARM_TRANSFER",
+  "transfer_to": "SENIOR_GRIEVANCE_OFFICER",
+  "context_passed": true,
+  "disposition": "SERVICE_ESCALATION"
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p5-s3',
+        title: 'P5-S3: Grace Period Reinstatement',
+        risk: 'high',
+        tech: `<strong>Context:</strong> Policy lapsed, in grace period<br>
+               <strong>Key:</strong> Coverage suspended, reinstatement possible<br>
+               <strong>Urgency:</strong> 30-day window closing<br>
+               <strong>Medical:</strong> Check if required (>30 days = yes)`,
+        nlu: {
+          intent: 'OBJECTION_GRACE_PERIOD',
+          confidence: '0.91',
+          entities: ['lapse_days', 'reinstatement_type']
+        },
+        compliance: [
+          {type: 'warning', text: 'Grace period: Coverage suspended (not active)'},
+          {type: 'check', text: 'Medical check-up: Rule explained'},
+          {type: 'check', text: 'Urgency: Without pressure tactics'}
+        ],
+        script: `
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Prasant</span>
+            My policy expired last month. Can I still renew?
+          </div>
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">Grace Period Check</span>
+            Expiry: 28 Jan 2025<br>
+            Today: 10 Feb 2025<br>
+            Days Lapsed: 13<br>
+            Grace Remaining: 17 days<br>
+            Medical Required: NO<br>
+            Coverage: SUSPENDED
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            Yes, you can renew, Prasant. You're in the grace period - 13 days past expiry with 17 days remaining. However, I must inform you that your coverage is currently suspended. Any hospitalization since 29th January would not be covered.
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            The good news: Since it's been less than 30 days, you can reinstate without medical tests. Your waiting periods and NCB remain protected. Shall I process the renewal now to restore your coverage immediately?
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-orange-400">
+{
+  "objection": "GRACE_PERIOD_REINSTATEMENT",
+  "days_lapsed": 13,
+  "grace_remaining": 17,
+  "medical_required": false,
+  "coverage_status": "SUSPENDED",
+  "reinstatement_eligible": true,
+  "urgency": "HIGH",
+  "route": "PHASE_6_PAYMENT",
+  "disposition": "GRACE_REINSTATEMENT"
+}</pre>
+          </div>`
+      }
+    ]
+  },
+
+  // PHASE 6: PAYMENT EXECUTION
+  {
+    id: 'p6', 
+    title: 'Phase 6: Payment Execution', 
+    color: 'border-brand-orange',
+    bgColor: 'bg-orange-500/10 text-orange-400 border-orange-500/50',
+    progress: 75,
+    desc: 'Generating secure links, handling transaction states, confirmation.',
+    scenarios: [
+      {
+        id: 'p6-s1',
+        title: 'P6-S1: Payment Link Generated',
+        risk: 'low',
+        tech: `<strong>API:</strong> POST /api/v1/payment/tokenized-link<br>
+               <strong>Validity:</strong> 15 minutes<br>
+               <strong>Channels:</strong> SMS + WhatsApp<br>
+               <strong>Security:</strong> Tokenized URL, no sensitive data in plain text`,
+        nlu: {
+          intent: 'PAYMENT_INITIATED',
+          confidence: '1.00',
+          entities: ['payment_amount', 'validity_period']
+        },
+        compliance: [
+          {type: 'check', text: 'Tokenized link: Generated'},
+          {type: 'check', text: 'Validity: Communicated (15 mins)'},
+          {type: 'info', text: 'Channels: SMS + WhatsApp dispatched'}
+        ],
+        script: `
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            The renewal premium is <strong>eighteen thousand four hundred and fifty rupees</strong>, inclusive of GST. I am now sending a secure payment link to your registered mobile ending with <strong>4321</strong>.
+          </div>
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">Payment API Call</span>
+            POST /api/v1/payment/tokenized-link<br>
+            {<br>
+              "policy": "SH-AX92-8847",<br>
+              "amount": 18450,<br>
+              "mobile": "98XXX4321",<br>
+              "validity_min": 15,<br>
+              "channels": ["SMS", "WhatsApp"]<br>
+            }<br>
+            <br>
+            Response: 200 OK<br>
+            Link ID: LNK-2025-9982<br>
+            Short URL: https://starhealth.in/p/Ab3x9
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            The link has been sent via SMS and WhatsApp. It's valid for 15 minutes. You can pay using UPI, credit card, debit card, or net banking. Please let me know once you've completed the payment.
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-blue-400">
+{
+  "payment_link": {
+    "link_id": "LNK-2025-9982",
+    "short_url": "https://starhealth.in/p/Ab3x9",
+    "valid_until": "2025-02-13T10:34:22",
+    "channels": ["SMS", "WhatsApp"],
+    "status": "SENT"
+  },
+  "awaiting_callback": true,
+  "timeout_set": "15_MINUTES"
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p6-s2',
+        title: 'P6-S2: Payment Success',
+        risk: 'low',
+        tech: `<strong>Webhook:</strong> payment.captured<br>
+               <strong>CRM Update:</strong> Policy status → Active<br>
+               <strong>Receipt:</strong> Generated and dispatched<br>
+               <strong>Next:</strong> Welcome call scheduled`,
+        nlu: {
+          intent: 'PAYMENT_SUCCESS',
+          confidence: '1.00',
+          entities: ['transaction_id', 'payment_mode']
+        },
+        compliance: [
+          {type: 'check', text: 'Payment confirmation: Immediate'},
+          {type: 'check', text: 'Policy document: Dispatched within 2 hours'},
+          {type: 'info', text: 'Receipt: Generated with GST breakdown'}
+        ],
+        script: `
+          <div class="script-bubble user-bubble">
+            <span class="label-user">Prasant</span>
+            I've paid. Money deducted.
+          </div>
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">Webhook Received</span>
+            Source: Razorpay<br>
+            Event: payment.captured<br>
+            Amount: ₹18,450<br>
+            Transaction ID: txn_9A3x8K2m<br>
+            Mode: UPI<br>
+            Status: SUCCESS
+          </div>
+          <div class="script-bubble bot-bubble" style="border-left-color: #22c55e;">
+            <span class="label-bot">Supriya (Bot)</span>
+            Thank you, Prasant! Your payment has been successfully received. Your Star Health Super Star policy is now renewed and active with coverage of ₹10 lakhs continuing without interruption.
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            Your policy document and receipt have been sent to your registered email. You'll also receive an SMS confirmation shortly. Your next renewal is due 28th February 2026. Is there anything else I can help you with?
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-green-400">
+{
+  "disposition": "RENEWED",
+  "payment_status": "SUCCESS",
+  "transaction_id": "txn_9A3x8K2m",
+  "amount": 18450,
+  "mode": "UPI",
+  "policy_status": "ACTIVE",
+  "document_dispatch": "TRIGGERED",
+  "welcome_call_scheduled": "2025-02-14T11:00:00",
+  "next_renewal": "2026-02-28"
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p6-s3',
+        title: 'P6-S3: Payment Failure/Timeout',
+        risk: 'medium',
+        tech: `<strong>Trigger:</strong> 15 min elapsed OR payment.failed webhook<br>
+               <strong>Retry:</strong> Offer resend or alternative method<br>
+               <strong>Fallback:</strong> Schedule callback<br>
+               <strong>Follow-up:</strong> Auto-retry after 4 hours`,
+        nlu: {
+          intent: 'PAYMENT_FAILURE',
+          confidence: '0.85',
+          entities: ['failure_reason', 'retry_eligible']
+        },
+        compliance: [
+          {type: 'warning', text: 'Payment failed: No blame on customer'},
+          {type: 'check', text: 'Retry option: Offered immediately'},
+          {type: 'info', text: 'Alternative methods: Presented'}
+        ],
+        script: `
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">Timeout Alert</span>
+            Timer: 15 minutes elapsed<br>
+            Payment Status: PENDING<br>
+            Link Status: EXPIRED<br>
+            Action: RETRY_PROTOCOL
+          </div>
+          <div class="script-bubble bot-bubble" style="border-left-color: #fb923c;">
+            <span class="label-bot">Supriya (Bot)</span>
+            I haven't received payment confirmation yet. The link may have expired or there might have been a technical issue. This happens sometimes.
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            I can:<br>
+            1. Resend the payment link immediately<br>
+            2. Send a link valid for 24 hours if you want to pay later<br>
+            3. Schedule a callback for tomorrow<br>
+            <br>
+            What would you prefer?
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-orange-400">
+{
+  "disposition": "PAYMENT_PENDING",
+  "payment_status": "TIMEOUT",
+  "retry_offered": true,
+  "options": ["RESEND_LINK", "EXTENDED_LINK", "CALLBACK"],
+  "auto_follow_up": "2025-02-13T14:00:00",
+  "priority": "HIGH"
+}</pre>
+          </div>`
+      }
+    ]
+  },
+
+  // PHASE 7: CONFIRMATION
+  {
+    id: 'p7', 
+    title: 'Phase 7: Confirmation', 
+    color: 'border-brand-green',
+    bgColor: 'bg-green-500/10 text-green-400 border-green-500/50',
+    progress: 87,
+    desc: 'Finalizing journey, policy activation, next steps communication.',
+    scenarios: [
+      {
+        id: 'p7-s1',
+        title: 'P7-S1: Standard Renewal Confirmation',
+        risk: 'low',
+        tech: `<strong>Actions:</strong> Policy activation, document dispatch<br>
+               <strong>Communication:</strong> Email, SMS, WhatsApp<br>
+               <strong>Next:</strong> Welcome call, NPS survey schedule<br>
+               <strong>Retention:</strong> Referral ask`,
+        nlu: {
+          intent: 'CONFIRMATION_STANDARD',
+          confidence: '1.00',
+          entities: ['confirmation_type']
+        },
+        compliance: [
+          {type: 'check', text: 'Policy activation: Confirmed'},
+          {type: 'check', text: 'Document dispatch: Within 2 hours'},
+          {type: 'info', text: 'Referral program: Mentioned'}
+        ],
+        script: `
+          <div class="script-bubble bot-bubble" style="border-left-color: #22c55e;">
+            <span class="label-bot">Supriya (Bot)</span>
+            Perfect! Your renewal is complete. Here's your summary:
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            ✓ Policy SH-AX92: <strong>Active</strong> until 28 Feb 2026<br>
+            ✓ Sum Insured: <strong>₹10 lakhs</strong><br>
+            ✓ Premium Paid: <strong>₹18,450</strong><br>
+            ✓ NCB Protected: <strong>25%</strong><br>
+            ✓ Document: <strong>Email within 2 hours</strong>
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            If you're satisfied with Star Health, would you recommend us to family or friends? They can get 10% off their first premium using your referral code STAR-PRASANT.
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-green-400">
+{
+  "disposition": "RENEWED_CONFIRMED",
+  "policy_status": "ACTIVE",
+  "coverage_start": "2025-02-28",
+  "coverage_end": "2026-02-27",
+  "document_dispatch": "SCHEDULED",
+  "welcome_call": "2025-02-14T11:00:00",
+  "nps_survey": "2025-02-20T10:00:00",
+  "referral_ask": true
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p7-s2',
+        title: 'P7-S2: Grace Period Reinstatement Confirmation',
+        risk: 'medium',
+        tech: `<strong>Special:</strong> Coverage gap disclosure<br>
+               <strong>Warning:</strong> No claims during gap period<br>
+               <strong>Action:</strong> Auto-debit setup offer<br>
+               <strong>Follow-up:</strong> Prevent future lapses`,
+        nlu: {
+          intent: 'CONFIRMATION_GRACE',
+          confidence: '1.00',
+          entities: ['reinstatement_type', 'gap_period']
+        },
+        compliance: [
+          {type: 'warning', text: 'Coverage gap: Clearly disclosed'},
+          {type: 'check', text: 'No claims during gap: Explicitly stated'},
+          {type: 'info', text: 'Auto-debit: Offered to prevent future lapse'}
+        ],
+        script: `
+          <div class="script-bubble bot-bubble" style="border-left-color: #22c55e;">
+            <span class="label-bot">Supriya (Bot)</span>
+            Your policy is now reinstated and active from today.
+          </div>
+          <div class="script-bubble bot-bubble" style="border-left-color: #fb923c;">
+            <span class="label-bot">Supriya (Bot)</span>
+            <strong>Important:</strong> Please note there was a 13-day gap in coverage (29 Jan - 10 Feb). Any hospitalization during this period is not covered. Your policy is now fully active for future treatments.
+          </div>
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            To avoid future lapses, would you like to set up auto-debit for next year's renewal? This ensures continuous coverage without you having to remember.
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-yellow-400">
+{
+  "disposition": "REINSTATED_GRACE",
+  "reinstatement_type": "WITHOUT_MEDICAL",
+  "gap_days": 13,
+  "coverage_gap_disclosed": true,
+  "auto_debit_offered": true,
+  "future_lapse_prevention": "AUTO_DEBIT_SIGNUP",
+  "priority": "EDUCATION"
+}</pre>
+          </div>`
+      }
+    ]
+  },
+
+  // PHASE 8: CLOSURE & ANALYTICS
+  {
+    id: 'p8', 
+    title: 'Phase 8: Closure & Analytics', 
+    color: 'border-brand-purple',
+    bgColor: 'bg-purple-500/10 text-purple-400 border-purple-500/50',
+    progress: 100,
+    desc: 'Call wrap-up, sentiment analysis, CRM write-back, continuous learning.',
+    scenarios: [
+      {
+        id: 'p8-s1',
+        title: 'P8-S1: Successful Renewal - Complete Analytics',
+        risk: 'low',
+        tech: `<strong>CRM Write-back:</strong> Full journey data<br>
+               <strong>Sentiment Analysis:</strong> Trajectory analysis<br>
+               <strong>Bot Performance:</strong> ASR, TTS, NLU scores<br>
+               <strong>Next Best Action:</strong> Triggered`,
+        nlu: {
+          intent: 'CALL_COMPLETE',
+          confidence: '1.00',
+          entities: ['call_outcome', 'sentiment_score']
+        },
+        compliance: [
+          {type: 'check', text: 'Recording: Archived (7 years)'},
+          {type: 'check', text: 'DPDP compliance: Consent logged'},
+          {type: 'info', text: 'Analytics: Real-time streaming'}
+        ],
+        script: `
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            Thank you for choosing Star Health Insurance. Have a healthy year ahead. Goodbye!
+          </div>
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">Call End</span>
+            Duration: 4m 32s<br>
+            Disconnect: Customer<br>
+            Recording: Archived<br>
+            Sentiment Trajectory: Neutral → Positive → Positive
+          </div>`,
+        outcome: `
+          <div class="bg-slate-900 p-4 rounded-lg border border-slate-800">
+            <h5 class="text-slate-400 text-xs font-bold mb-3">COMPLETE CRM WRITE-BACK</h5>
+            <pre class="font-mono text-xs text-purple-400 overflow-x-auto">
+{
+  "call_id": "SH-V-2025-884721",
+  "timestamp": "2025-02-13T10:08:54+05:30",
+  "customer_id": "CUST-PRASANT-K-8847",
+  "policy_number": "SH-AX92-8847",
+  
+  "outcome": {
+    "disposition": "RENEWED_BOT",
+    "payment_status": "SUCCESS",
+    "amount_collected": 18450,
+    "payment_mode": "UPI"
+  },
+  
+  "conversation_metrics": {
+    "duration_seconds": 272,
+    "phase_breakdown": {
+      "p1_pre_call": 0,
+      "p2_consent": 18,
+      "p3_context": 25,
+      "p4_intent": 32,
+      "p5_objection": 45,
+      "p6_payment": 120,
+      "p7_closure": 32
+    },
+    "intent_confidence_scores": [0.94, 0.89, 0.95, 0.98],
+    "sentiment_trajectory": ["neutral", "positive", "positive", "positive"],
+    "overall_sentiment": 0.82,
+    "objection_raised": "ACTIVE_CLAIM",
+    "objection_resolved": true
+  },
+  
+  "bot_performance": {
+    "language": "English",
+    "tts_clarity_score": 4.8,
+    "asr_accuracy": 0.96,
+    "barge_in_count": 1,
+    "silence_handling": "effective",
+    "nlu_precision": 0.94
+  },
+  
+  "next_actions": {
+    "policy_document_dispatch": "2025-02-13T10:10:00",
+    "welcome_call_scheduled": "2025-02-14T11:00:00",
+    "nps_survey": "2025-02-20T10:00:00",
+    "next_renewal_reminder": "2026-01-28"
+  },
+  
+  "compliance_flags": {
+    "recording_disclosure": true,
+    "consent_logged": true,
+    "dpdp_compliant": true,
+    "prohibited_statements": 0
+  }
+}</pre>
+          </div>`
+      },
+      {
+        id: 'p8-s2',
+        title: 'P8-S2: Churned - Win-Back Trigger',
+        risk: 'high',
+        tech: `<strong>Disposition:</strong> CHURNED<br>
+               <strong>Win-back:</strong> Campaign triggered<br>
+               <strong>Retention:</strong> Specialist callback scheduled<br>
+               <strong>Analysis:</strong> Churn reason logged for ML`,
+        nlu: {
+          intent: 'CALL_COMPLETE_CHURN',
+          confidence: '1.00',
+          entities: ['churn_reason', 'win_back_eligible']
+        },
+        compliance: [
+          {type: 'check', text: 'Churn reason: Documented'},
+          {type: 'info', text: 'Win-back campaign: Triggered'},
+          {type: 'info', text: 'Grace period: Reminder scheduled'}
+        ],
+        script: `
+          <div class="script-bubble bot-bubble">
+            <span class="label-bot">Supriya (Bot)</span>
+            I understand your decision, Prasant. If you change your mind, you can renew within 30 days without losing your benefits. I'll send you an email with renewal options and our contact details.
+          </div>
+          <div class="script-bubble sys-bubble">
+            <span class="label-sys">Churn Analysis</span>
+            Disposition: CHURNED<br>
+            Reason: PRICE (Competitor: HDFC Ergo)<br>
+            Win-back Eligible: YES<br>
+            Campaign: PRICE_SENSITIVE_7DAY<br>
+            Specialist Callback: SCHEDULED
+          </div>`,
+        outcome: `
+          <div class="p-4 bg-slate-900/50 font-mono text-xs text-red-400">
+{
+  "disposition": "CHURNED",
+  "churn_reason": "PRICE_COMPETITOR",
+  "competitor": "HDFC_ERGO",
+  "win_back_campaign": "PRICE_SENSITIVE_7DAY",
+  "retention_specialist_callback": "2025-02-14T14:00:00",
+  "grace_period_reminder": "2025-02-25",
+  "ml_feedback": "PRICE_OBJECTION_NOT_OVERCOME",
+  "future_pricing": "CONSIDER_DISCOUNT"
+}</pre>
+          </div>`
+      }
+    ]
+  }
+];
+
+// --- LOGIC ---
+
+function initTree(){
+  const container = document.getElementById('blueprint-tree');
+  
+  blueprintData.forEach((phase, index) => {
+    const phaseDiv = document.createElement('div');
+    phaseDiv.className = `tree-node glass-panel rounded-xl border-l-4 ${phase.color} overflow-hidden mb-2`;
+    
+    let childrenHtml = '';
+    phase.scenarios.forEach((scenario, sIndex) => {
+      const riskBadge = scenario.risk === 'high' ? '<span class="ml-2 px-1.5 py-0.5 rounded text-[9px] bg-red-500/20 text-red-400 border border-red-500/30">HIGH RISK</span>' : 
+                       scenario.risk === 'medium' ? '<span class="ml-2 px-1.5 py-0.5 rounded text-[9px] bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">MED</span>' : '';
+      
+      childrenHtml += `
+        <div class="scenario-card group flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all mt-1"
+             onclick="showDetail(${index}, ${sIndex}, event)">
+          <span class="text-xs text-slate-400 group-hover:text-white font-medium flex items-center flex-wrap gap-1">
+            <i class="fas fa-code-branch text-[10px] opacity-50"></i> 
+            ${scenario.title}${riskBadge}
+          </span>
+          <i class="fas fa-chevron-right text-[10px] text-slate-600 group-hover:text-brand-blue transition-colors"></i>
+        </div>
+      `;
+    });
+
+    phaseDiv.innerHTML = `
+      <div class="node-content p-3 flex justify-between items-center bg-slate-800/20" onclick="toggleNode('${phase.id}')">
+        <div class="flex-1">
+          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">Phase ${index + 1}</span>
+          <span class="text-sm font-semibold text-slate-200 leading-tight block">${phase.title}</span>
+        </div>
+        <i id="icon-${phase.id}" class="fas fa-chevron-right rotate-icon text-slate-500 text-xs"></i>
+      </div>
+      <div id="child-${phase.id}" class="child-container pb-3 pr-3">
+        ${childrenHtml}
+      </div>
+    `;
+    
+    container.appendChild(phaseDiv);
+  });
+}
+
+function toggleNode(id){
+  const child = document.getElementById(`child-${id}`);
+  const icon = document.getElementById(`icon-${id}`);
+  
+  child.classList.toggle('active');
+  icon.classList.toggle('expanded');
+}
+
+function showDetail(phaseIndex, scenarioIndex, e){
+  if(e) e.stopPropagation();
+  
+  const phase = blueprintData[phaseIndex];
+  const scenario = phase.scenarios[scenarioIndex];
+
+  document.getElementById('details-empty').classList.add('hidden');
+  const contentDiv = document.getElementById('details-content');
+  contentDiv.classList.remove('hidden');
+  
+  contentDiv.querySelectorAll('.fade-in').forEach(el => {
+    el.style.animation = 'none';
+    el.offsetHeight;
+    el.style.animation = null; 
+  });
+
+  document.getElementById('detail-tag').innerText = phase.title.split(':')[0];
+  document.getElementById('detail-tag').className = `px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${phase.bgColor}`;
+  
+  const riskBadge = document.getElementById('detail-risk-badge');
+  if(scenario.risk === 'high') {
+    riskBadge.classList.remove('hidden');
+  } else {
+    riskBadge.classList.add('hidden');
+  }
+
+  document.getElementById('detail-scenario-badge').classList.remove('hidden');
+  document.getElementById('detail-scenario-badge').innerText = scenario.id;
+  document.getElementById('detail-scenario-badge').className = `px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${phase.bgColor}`;
+  
+  document.getElementById('detail-title').innerText = scenario.title.split(': ')[1];
+  document.getElementById('detail-desc').innerText = phase.desc;
+  
+  document.getElementById('phase-progress').style.width = phase.progress + '%';
+  
+  document.getElementById('confidence-score').innerText = `Confidence: ${scenario.nlu.confidence === 'N/A' ? 'N/A' : Math.round(parseFloat(scenario.nlu.confidence) * 100) + '%'}`;
+  
+  // Show claim flag if relevant
+  const claimFlag = document.getElementById('context-claim-flag');
+  if(scenario.id.includes('S2') && phase.id === 'p1') {
+    claimFlag.classList.remove('hidden');
+  } else {
+    claimFlag.classList.add('hidden');
+  }
+  
+  document.getElementById('detail-tech').innerHTML = scenario.tech;
+  
+  // NLU Section
+  const nluSection = document.getElementById('detail-nlu');
+  nluSection.innerHTML = `
+    <div class="glass-panel rounded-xl p-4 border border-slate-800">
+      <div class="text-xs text-slate-500 uppercase mb-2">Primary Intent</div>
+      <div class="text-lg font-bold text-brand-blue">${scenario.nlu.intent}</div>
+      <div class="text-xs text-slate-400 mt-1">Confidence: ${scenario.nlu.confidence}</div>
+    </div>
+    <div class="glass-panel rounded-xl p-4 border border-slate-800">
+      <div class="text-xs text-slate-500 uppercase mb-2">Entities Extracted</div>
+      <div class="flex flex-wrap gap-2">
+        ${scenario.nlu.entities.map(e => `<span class="px-2 py-1 rounded bg-slate-800 text-slate-300 text-xs border border-slate-700">${e}</span>`).join('')}
+      </div>
+    </div>
+  `;
+  
+  document.getElementById('detail-script').innerHTML = scenario.script;
+  
+  // Compliance Section
+  const complianceSection = document.getElementById('detail-compliance');
+  complianceSection.innerHTML = scenario.compliance.map(c => `
+    <div class="flex items-start gap-3 p-3 rounded-lg ${c.type === 'warning' ? 'bg-red-500/10 border border-red-500/20' : c.type === 'check' ? 'bg-green-500/10 border border-green-500/20' : 'bg-blue-500/10 border border-blue-500/20'}">
+      <i class="fas ${c.type === 'warning' ? 'fa-exclamation-triangle text-red-400' : c.type === 'check' ? 'fa-check-circle text-green-400' : 'fa-info-circle text-blue-400'} mt-0.5"></i>
+      <span class="text-sm text-slate-300">${c.text}</span>
+    </div>
+  `).join('');
+  
+  document.getElementById('detail-outcome').innerHTML = scenario.outcome;
+}
+
+function expandAll(){
+  blueprintData.forEach(p => {
+    document.getElementById(`child-${p.id}`).classList.add('active');
+    document.getElementById(`icon-${p.id}`).classList.add('expanded');
+  });
+}
+
+function collapseAll(){
+  blueprintData.forEach(p => {
+    document.getElementById(`child-${p.id}`).classList.remove('active');
+    document.getElementById(`icon-${p.id}`).classList.remove('expanded');
+  });
+}
+
+function showMetrics(){
+  alert('Analytics Dashboard: 47 scenarios covering 8 phases with 94% average intent confidence and 87% compliance adherence.');
+}
+
+function simulateCall(){
+  const btn = document.querySelector('button[onclick="simulateCall()"]');
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Simulating...';
+  setTimeout(() => {
+    btn.innerHTML = '<i class="fas fa-play mr-2"></i>Simulate';
+    alert('Call simulation started. This would trigger the voice bot with the selected scenario context.');
+  }, 1500);
+}
+
+function copyScript(){
+  const script = document.getElementById('detail-script').innerText;
+  navigator.clipboard.writeText(script).then(() => {
+    alert('Script copied to clipboard!');
+  });
+}
+
+window.onload = initTree;
+
+</script>
+</body>
+</html>
